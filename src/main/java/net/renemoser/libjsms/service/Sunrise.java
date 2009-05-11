@@ -57,7 +57,7 @@ public class Sunrise implements ShortMessageService {
 	    _conn.setDoOutput(true);
 	    
 	    _conn.setRequestMethod("POST");
-	    _conn.setRequestProperty("User-Agent", "libJSwissSMS");	    
+	    _conn.setRequestProperty("User-Agent", "libJSMS");	    
 	    _conn.setRequestProperty("Accept-Language","de-de");
 	    _conn.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
 	    _conn.setRequestProperty("Referer","https://mip.sunrise.ch/mip/dyn/login/login?SAMLRequest=fVLJTsMwEL0j8Q%2BW79kqQGA1qUoRohJL1AYO3FxnkrpNxsHjtPD3pGnLcoCjn5%2FfMp7h6L2u2AYsaYMxj%2FyQM0Blco1lzJ%2BzW%2B%2BSj5LTkyHJumrEuHVLnMFbC%2BRY9xJJ9Bcxby0KI0mTQFkDCafEfPxwLwZ%2BKBprnFGm4mx6E3OZy2YtscG11qpeQYFqoXGdr81KQYmrCosiL%2FOas5djrMEu1pSohSmSk%2Bg6KAyvvDDywsssOhPhhTg%2Ff%2BUsPThda9w3%2BC%2FWYk8icZdlqZc%2BzbNeYKNzsI8dO%2BalMWUFvjL1zj6VRHrTwc62wNmYCKzr8k0MUluDnYPdaAXPs%2FuYL51rSATBdrv1v1UCGVCLVlN3WgZSEU%2F6wYq%2Bm%2F0x0f%2BTy6M1T77Fh8EPqeTwYbse05vUVFp9sHFVme3EgnRfJW6NraX72y3yox7RuVf0VNEiNaB0oSHnLEj2rr83o9uXTw%3D%3D&RelayState=https%3A%2F%2Fwww.google.com%2Fa%2Fsunrise.ch%2FServiceLogin%3Fcontinue%3Dhttp%253A%252F%252Fpartnerpage.google.com%252Fsunrise.ch%252Fdefault%252Fpostlogin%253Fpid%253Dsunrise.ch%2526url%253Dhttp%253A%252F%252Fpartnerpage.google.com%252Fsunrise.ch%26followup%3Dhttp%253A%252F%252Fpartnerpage.google.com%252Fsunrise.ch%252Fdefault%252Fpostlogin%253Fpid%253Dsunrise.ch%2526url%253Dhttp%253A%252F%252Fpartnerpage.google.com%252Fsunrise.ch%26service%3Dig%26passive%3Dtrue%26cd%3DUS%26hl%3Dde%26nui%3D1%26ltmpl%3Ddefault%26go%3Dtrue%26passive_sso%3Dtrue");
@@ -155,7 +155,7 @@ public class Sunrise implements ShortMessageService {
 	    _conn.setDoOutput(true);
 	    
 	    _conn.setRequestMethod("POST");
-	    _conn.setRequestProperty("User-Agent", "libJSwissSMS");	    
+	    _conn.setRequestProperty("User-Agent", "libJSMS");	    
 	    _conn.setRequestProperty("Accept-Language","de-de");
 	    _conn.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
 	    _conn.setRequestProperty("Cookie","JSESSIONID=" + _cookies.get("JSESSIONID") + ";SMIP=" + _cookies.get("SMIP") + "; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=de; mip_msg_dispContacts=0");
