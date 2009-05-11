@@ -1,0 +1,36 @@
+(c) René Moser, <mail@renemoser.net>, 2009 
+This application is licenced under GNU Lesser General Public License, Version 3.0
+http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+
+About:
+------
+There are is swisssms for OS X [1] and Java Swing GUI SwissSMSCient [2], but I just 
+wanted to have a small lib, which can be used to send SMS' by scripting or building
+a GUI based on it, whatever you like.
+
+I used maven. The Project site is http://www.renemoser.net/projects/.
+
+[1] http://code.google.com/p/swisssms/
+[2] http://code.google.com/p/swisssmsclient/ 
+
+Usage as external lib:
+----------------------
+import net.renemoser.libjsms.service.*;
+
+try {
+	ShortMessageService Sunrise = new Sunrise();
+    Sunrise.doLogin(userid, password);
+    Sunrise.sendShortMessage(phoneNumber, message);
+    if (!Sunrise.getShortMessage().isEmpty()) {
+    	System.out.println("Message '" 
+    	+ Sunrise.getShortMessage() 
+    	+ "' was sent to " 
+    	+ Sunrise.getPhoneNumber());
+    }
+} catch(Exception e) {
+    e.printStackTrace();
+}
+
+Usage as standalone:
+--------------------
+java -cp net.renemoser.libjsms.App <userid> <password> <phoneNumber> <message>
