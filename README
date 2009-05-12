@@ -4,11 +4,15 @@ http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
 About:
 ------
-There are is swisssms for OS X [1] and Java Swing GUI SwissSMSCient [2], but I just 
-wanted to have a small lib, which can be used to send SMS' by scripting or building
-a GUI based on it, whatever you like.
+Java library sending "short messages" (alias SMS) using free web service of your 
+mobile provider. Currently only Sunrise Swiss mobile provider is supported, but feel free 
+to add your provider's web interface.
 
-I used maven. The Project site is http://www.renemoser.net/projects/.
+There are is swisssms for OS X [1] in C# and Java Swing GUI SwissSMSCient [2], but I just 
+wanted to have a small library in Java, which can be used to send SMS' by scripting or 
+building a GUI based on it, whatever you like.
+
+I used Apache's Maven. The Project site is http://www.renemoser.net/projects/ and http://github.com/resmo/libjsms
 
 [1] http://code.google.com/p/swisssms/
 [2] http://code.google.com/p/swisssmsclient/ 
@@ -22,10 +26,10 @@ try {
     Sunrise.doLogin(userid, password);
     Sunrise.sendShortMessage(phoneNumber, message);
     if (!Sunrise.getShortMessage().isEmpty()) {
-    	System.out.println("Message '" 
-    	+ Sunrise.getShortMessage() 
-    	+ "' was sent to " 
-    	+ Sunrise.getPhoneNumber());
+    	System.out.println("Message '" + 
+    	Sunrise.getShortMessage() + 
+    	"' was sent to " + 
+    	Sunrise.getPhoneNumber());
     }
 } catch(Exception e) {
     e.printStackTrace();
