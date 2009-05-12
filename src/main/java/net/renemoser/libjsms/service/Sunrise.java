@@ -26,7 +26,7 @@ public class Sunrise implements ShortMessageService {
 	
 	private Hashtable<String,String> _cookies = new Hashtable<String,String>(); 
 	
-	protected HttpURLConnection _conn;
+	private HttpURLConnection _conn;
 	
 	/**
 	 * @throws Exception
