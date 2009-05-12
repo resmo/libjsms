@@ -5,7 +5,7 @@ http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 About:
 ------
 Java library sending "short messages" (alias SMS) using free web service of your 
-mobile provider. Currently only Sunrise Swiss mobile provider is supported, but feel free 
+mobile provider. Currently only Swiss mobile provider Sunrise and Orange are supported, but feel free 
 to add your provider's web interface.
 
 There are is swisssms for OS X [1] in C# and Java Swing GUI SwissSMSCient [2], but I just 
@@ -22,14 +22,14 @@ Usage as external lib:
 import net.renemoser.libjsms.service.*;
 
 try {
-	ShortMessageService Sunrise = new Sunrise();
-    Sunrise.doLogin(userid, password);
-    Sunrise.sendShortMessage(phoneNumber, message);
-    if (!Sunrise.getShortMessage().isEmpty()) {
+    ShortMessageService Service  = new Sunrise();
+    Service.doLogin(userid, password);
+    Service.sendShortMessage(phoneNumber, message);
+    if (!Service.getShortMessage().isEmpty()) {
     	System.out.println("Message '" + 
-    	Sunrise.getShortMessage() + 
+    	Service.getShortMessage() + 
     	"' was sent to " + 
-    	Sunrise.getPhoneNumber());
+    	Service.getPhoneNumber());
     }
 } catch(Exception e) {
     e.printStackTrace();
@@ -37,4 +37,4 @@ try {
 
 Usage as standalone:
 --------------------
-java -cp LibJSMS-x.y.jar net.renemoser.libjsms.App <userid> <password> <phoneNumber> <message>
+java -cp LibJSMS-x.y.jar net.renemoser.libjsms.App <userid> <password> <phoneNumber> <message> <provider:default=sunrise> 
