@@ -37,4 +37,4 @@ try {
 
 Usage as standalone:
 --------------------
-java -cp net.renemoser.libjsms.App <userid> <password> <phoneNumber> <message>
+java -cp LibJSMS-x.y.jar net.renemoser.libjsms.App <userid> <password> <phoneNumber> <message>
