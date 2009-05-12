@@ -23,6 +23,7 @@ public class Sunrise implements ShortMessageService {
 	
 	private String _shortMessage = "";
 	private String _phoneNumber = "";
+	private boolean _isLoggedIn = false;
 	
 	private Hashtable<String,String> _cookies = new Hashtable<String,String>(); 
 	
@@ -120,6 +121,7 @@ public class Sunrise implements ShortMessageService {
 		if(!_cookies.containsKey("SMIP") || !_cookies.containsKey("JSESSIONID")) {
 			throw new Exception("Login unsuccessful. Warning: Sunrise only allow 5 attempts in 10 minutes.");
 		}
+		_isLoggedIn = true;
 	}
 
 	public void sendShortMessage(String phoneNumber, String shortMessage) throws Exception {		
@@ -144,7 +146,7 @@ public class Sunrise implements ShortMessageService {
         	throw new Exception("Phonenumber '" + phoneNumber + "' looks wrong!");
         }
         
-        if(_cookies.get("SMIP").isEmpty() || _cookies.get("JSESSIONID").isEmpty()) {
+        if(!_isLoggedIn) {
         	throw new Exception("You are not logged in!");        	
         }
              
@@ -202,7 +204,7 @@ public class Sunrise implements ShortMessageService {
 	    rd.close();
 	    
 	    if (response.toString().indexOf("SMS wurde an "+phoneNumber+" gesendet.") <= 0) {
-	    	throw new Exception("Message was not sent: "+response.toString());
+	    	throw new Exception("Message was not sent.");
 	    }
 	    
 	    _phoneNumber = phoneNumber;
