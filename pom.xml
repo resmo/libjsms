@@ -4,7 +4,7 @@
   <groupId>net.renemoser.libjsms</groupId>
   <artifactId>LibJSMS</artifactId>
   <packaging>jar</packaging>
-  <version>0.2</version>
+  <version>0.333</version>
   <name>LibJSMS</name>
   <description>Java library to send short messages (alias SMS) using free web service of your mobile phone provider. Currently only Swiss mobile providers are supported, but feel free to add you provider's web interface.</description>
   <url>http://www.renemoser.net/project</url>
