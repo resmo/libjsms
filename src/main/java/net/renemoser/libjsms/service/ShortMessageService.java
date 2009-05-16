@@ -34,4 +34,10 @@ public interface ShortMessageService {
 	 * @throws Exception
 	 */
 	public String getPhoneNumber() throws Exception;
+	
+	/**
+	 * @return
+	 * @throws Exception
+	 */
+	public int getAvailableMessages() throws Exception;
 }

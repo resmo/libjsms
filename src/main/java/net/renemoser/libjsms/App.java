@@ -12,28 +12,47 @@ public class App {
 			System.exit(0);
 		}
 		
-		String userid = args[0] + "";
-		String password = args[1] + "";
-		String phoneNumber = args[2] + "";
-		String message = args[3] + "";
-		String provider = args[4].toLowerCase() + "";
+		String userid = args[0];
+		String password = args[1];
+		String phoneNumber = args[2];
+		String message = args[3];
+		
+		String provider = "";
+		if (args.length >= 5) { 
+			provider = args[4].toLowerCase();
+		}		
 						
 	    try { 
 	    	ShortMessageService Service;
 	    	if (provider.equals("orange")) {
 	    		Service = new Orange();
 	    	} else {
+	    		provider = "Sunrise";
 	    		Service = new Sunrise();
 	    	}
-	    	
+	    	// Login
+	    	System.out.println("Logging in...");
 	    	Service.doLogin(userid, password);
-	    	Service.sendShortMessage(phoneNumber, message);
-    	    if (!Service.getShortMessage().isEmpty()) {
-    	    	System.out.println("Message '" + 
-    	    			Service.getShortMessage() + 
-    	    			"' was sent to " + 
-    	    			Service.getPhoneNumber());
-    	    }
+	    	
+	    	// Available messages
+	    	System.out.println("Getting free messages left...");
+	    	int messagesLeft = Service.getAvailableMessages();
+	    	String messagesLeftString = Integer.toString(messagesLeft);
+	    	System.out.println("You have " + messagesLeftString + " messages left");
+	    	
+	    	if (messagesLeft > 0) {
+	    		// Send SMS
+	    		Service.sendShortMessage(phoneNumber, message);
+	    		if (!Service.getShortMessage().isEmpty()) {
+	    			System.out.println("Message '" + 
+	    					Service.getShortMessage() + 
+	    					"' was sent to " + 
+	    					Service.getPhoneNumber());
+	    		}
+	    	} else {
+	    		System.out.println("Gave it up, to few messages.");	    		
+	    	}
+    	    
     	} catch(Exception e) {
     	    e.printStackTrace();
     	}

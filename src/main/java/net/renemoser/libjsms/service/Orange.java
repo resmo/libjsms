@@ -11,32 +11,25 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Orange CH SMS Service
  * 
  * @author René Moser <mail@renemoser.net>
- * @version 0.1
+ * @version 0.2
  */
-public class Orange implements ShortMessageService {
+public class Orange extends Provider implements ShortMessageService {
 
 	private static final String HOST = "https://www.orange.ch";
 	private static final int MESSAGE_LENGHT = 144;
-	
-	private String _shortMessage = "";
-	private String _phoneNumber = "";
-	private boolean _isLoggedIn = false;
-	
-	private Hashtable<String,String> _cookies = new Hashtable<String,String>(); 
-	
-	private HttpURLConnection _conn;
-		
+
 	/**
 	 * @throws Exception
 	 */
 	public Orange() throws Exception {
-		System.getProperties().put("java.protocol.handler.pkgs","com.sun.net.ssl.internal.www.protocol");
-		java.security.Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
+		super();
 	}
 	
 	public void doLogin(String userid, String password) throws Exception {
@@ -63,7 +56,6 @@ public class Orange implements ShortMessageService {
 	    _conn.setRequestProperty("User-Agent", "libJSMS");	    
 	    _conn.setRequestProperty("Accept-Language","en");
 	    _conn.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-	    _conn.setRequestProperty("Referer","https://www.orange.ch/footer/login/loginForm?ts=1242151218216");
 
 	    Hashtable<String,String> parameters = new Hashtable<String,String>();
 
@@ -183,7 +175,6 @@ public class Orange implements ShortMessageService {
 	    }
 	    
 	    _conn.setRequestProperty("Cookie", cookieString.toString());
-	    _conn.setRequestProperty("Referer",HOST+"/myorange/sms/smsForm?ades.protocol=http&ts=1242151653520");
 	    
 	    Hashtable<String,String> parameters = new Hashtable<String,String>();
 	    parameters.put("wui_target_id", "sendButton");
@@ -224,18 +215,60 @@ public class Orange implements ShortMessageService {
 	    rd.close();
 	    
 	    if (response.toString().indexOf("Your SMS has been sent.") <= 0) {
-	    	throw new Exception("Message was not sent.");
+	    	throw new Exception("Message has not been sent.");
 	    }
 	    
 	    _phoneNumber = phoneNumber;
 	    _shortMessage = shortMessage;
 	}
-		
-	public String getShortMessage() {
-	    return _shortMessage;
-	}
 	
-	public String getPhoneNumber() {
-	    return _phoneNumber;
+	@Override
+	public int getAvailableMessages() throws Exception {
+        if(!_isLoggedIn) {
+        	throw new Exception("You are not logged in!");        	
+        }
+        
+        URL url = new URL(HOST+"/myorange/sms/smsForm?ts=1242151653520");
+		_conn = (HttpURLConnection) url.openConnection();
+	    _conn.setUseCaches (false);
+	    _conn.setDoInput(true);
+	    _conn.setDoOutput(true);
+	    
+	    _conn.setRequestMethod("GET");
+	    _conn.setRequestProperty("User-Agent", "libJSMS");	    
+	    _conn.setRequestProperty("Accept-Language","en");
+	    
+	    StringBuffer cookieString = new StringBuffer();
+	    Set<String> cookieSet = _cookies.keySet();
+	    Iterator<String> itr = cookieSet.iterator();    
+	    while (itr.hasNext()) {
+	    	 String key = itr.next();
+	    	 cookieString.append(key + "=" + _cookies.get(key)+";");
+	    }
+	    _conn.setRequestProperty("Cookie", cookieString.toString());
+	    
+	    InputStream is = _conn.getInputStream();
+	    BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+	    String line;
+
+	    _availableMessages = -1;    
+	    Pattern smsCounterPattern = Pattern.compile("This month, you can still send ([0-9]{1,3}) free SMS.");
+	    while((line = rd.readLine()) != null) {
+	    	line = line.replaceAll("<[^>]+>","").trim();
+	    	if (!line.isEmpty()) {
+	    		Matcher smsCounterMatcher = smsCounterPattern.matcher(line);
+	    		if (smsCounterMatcher.matches()) {
+	    			String smsCounterString = smsCounterMatcher.group(1);
+	    			_availableMessages = Integer.valueOf(smsCounterString);	
+	    		}
+	    	}
+	    }
+	    rd.close();
+
+	    if (_availableMessages == -1) {
+	    	throw new Exception("Available Messages is unknown.");
+	    }
+        
+        return _availableMessages;
 	}
 }

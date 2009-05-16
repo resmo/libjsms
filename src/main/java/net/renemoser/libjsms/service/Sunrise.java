@@ -9,34 +9,28 @@ import java.net.URLEncoder;
 import java.net.HttpURLConnection;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Sunrise CH SMS Service
  * 
  * @author René Moser <mail@renemoser.net>
- * @version 0.1
+ * @version 0.2
  */
-public class Sunrise implements ShortMessageService {
+public class Sunrise extends Provider implements ShortMessageService {
 
-	private static final String HOST = "https://mip.sunrise.ch";
-	private static final int MESSAGE_LENGHT = 160;
-	
-	private String _shortMessage = "";
-	private String _phoneNumber = "";
-	private boolean _isLoggedIn = false;
-	
-	private Hashtable<String,String> _cookies = new Hashtable<String,String>(); 
-	
-	private HttpURLConnection _conn;
+	private final static String HOST = "https://mip.sunrise.ch";
+	private final static int MESSAGE_LENGHT = 160;
 	
 	/**
 	 * @throws Exception
 	 */
 	public Sunrise() throws Exception {
-		System.getProperties().put("java.protocol.handler.pkgs","com.sun.net.ssl.internal.www.protocol");
-		java.security.Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
+		super();
 	}
 	
+	@Override
 	public void doLogin(String userid, String password) throws Exception {
 		// Make empty
 		_shortMessage = "";
@@ -61,7 +55,6 @@ public class Sunrise implements ShortMessageService {
 	    _conn.setRequestProperty("User-Agent", "libJSMS");	    
 	    _conn.setRequestProperty("Accept-Language","de-de");
 	    _conn.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-	    _conn.setRequestProperty("Referer","https://mip.sunrise.ch/mip/dyn/login/login?SAMLRequest=fVLJTsMwEL0j8Q%2BW79kqQGA1qUoRohJL1AYO3FxnkrpNxsHjtPD3pGnLcoCjn5%2FfMp7h6L2u2AYsaYMxj%2FyQM0Blco1lzJ%2BzW%2B%2BSj5LTkyHJumrEuHVLnMFbC%2BRY9xJJ9Bcxby0KI0mTQFkDCafEfPxwLwZ%2BKBprnFGm4mx6E3OZy2YtscG11qpeQYFqoXGdr81KQYmrCosiL%2FOas5djrMEu1pSohSmSk%2Bg6KAyvvDDywsssOhPhhTg%2Ff%2BUsPThda9w3%2BC%2FWYk8icZdlqZc%2BzbNeYKNzsI8dO%2BalMWUFvjL1zj6VRHrTwc62wNmYCKzr8k0MUluDnYPdaAXPs%2FuYL51rSATBdrv1v1UCGVCLVlN3WgZSEU%2F6wYq%2Bm%2F0x0f%2BTy6M1T77Fh8EPqeTwYbse05vUVFp9sHFVme3EgnRfJW6NraX72y3yox7RuVf0VNEiNaB0oSHnLEj2rr83o9uXTw%3D%3D&RelayState=https%3A%2F%2Fwww.google.com%2Fa%2Fsunrise.ch%2FServiceLogin%3Fcontinue%3Dhttp%253A%252F%252Fpartnerpage.google.com%252Fsunrise.ch%252Fdefault%252Fpostlogin%253Fpid%253Dsunrise.ch%2526url%253Dhttp%253A%252F%252Fpartnerpage.google.com%252Fsunrise.ch%26followup%3Dhttp%253A%252F%252Fpartnerpage.google.com%252Fsunrise.ch%252Fdefault%252Fpostlogin%253Fpid%253Dsunrise.ch%2526url%253Dhttp%253A%252F%252Fpartnerpage.google.com%252Fsunrise.ch%26service%3Dig%26passive%3Dtrue%26cd%3DUS%26hl%3Dde%26nui%3D1%26ltmpl%3Ddefault%26go%3Dtrue%26passive_sso%3Dtrue");
 
 	    Hashtable<String,String> parameters = new Hashtable<String,String>();
 
@@ -123,7 +116,8 @@ public class Sunrise implements ShortMessageService {
 		}
 		_isLoggedIn = true;
 	}
-
+	
+	@Override
 	public void sendShortMessage(String phoneNumber, String shortMessage) throws Exception {		
 		// Make empty
 		_shortMessage = "";
@@ -161,7 +155,6 @@ public class Sunrise implements ShortMessageService {
 	    _conn.setRequestProperty("Accept-Language","de-de");
 	    _conn.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
 	    _conn.setRequestProperty("Cookie","JSESSIONID=" + _cookies.get("JSESSIONID") + ";SMIP=" + _cookies.get("SMIP") + "; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=de; mip_msg_dispContacts=0");
-	    _conn.setRequestProperty("Referer","https://mip.sunrise.ch/mip/dyn/login/login?SAMLRequest=fVLJTsMwEL0j8Q%2BW79kqQGA1qUoRohJL1AYO3FxnkrpNxsHjtPD3pGnLcoCjn5%2FfMp7h6L2u2AYsaYMxj%2FyQM0Blco1lzJ%2BzW%2B%2BSj5LTkyHJumrEuHVLnMFbC%2BRY9xJJ9Bcxby0KI0mTQFkDCafEfPxwLwZ%2BKBprnFGm4mx6E3OZy2YtscG11qpeQYFqoXGdr81KQYmrCosiL%2FOas5djrMEu1pSohSmSk%2Bg6KAyvvDDywsssOhPhhTg%2Ff%2BUsPThda9w3%2BC%2FWYk8icZdlqZc%2BzbNeYKNzsI8dO%2BalMWUFvjL1zj6VRHrTwc62wNmYCKzr8k0MUluDnYPdaAXPs%2FuYL51rSATBdrv1v1UCGVCLVlN3WgZSEU%2F6wYq%2Bm%2F0x0f%2BTy6M1T77Fh8EPqeTwYbse05vUVFp9sHFVme3EgnRfJW6NraX72y3yox7RuVf0VNEiNaB0oSHnLEj2rr83o9uXTw%3D%3D&RelayState=https%3A%2F%2Fwww.google.com%2Fa%2Fsunrise.ch%2FServiceLogin%3Fcontinue%3Dhttp%253A%252F%252Fpartnerpage.google.com%252Fsunrise.ch%252Fdefault%252Fpostlogin%253Fpid%253Dsunrise.ch%2526url%253Dhttp%253A%252F%252Fpartnerpage.google.com%252Fsunrise.ch%26followup%3Dhttp%253A%252F%252Fpartnerpage.google.com%252Fsunrise.ch%252Fdefault%252Fpostlogin%253Fpid%253Dsunrise.ch%2526url%253Dhttp%253A%252F%252Fpartnerpage.google.com%252Fsunrise.ch%26service%3Dig%26passive%3Dtrue%26cd%3DUS%26hl%3Dde%26nui%3D1%26ltmpl%3Ddefault%26go%3Dtrue%26passive_sso%3Dtrue");
 	    
 	    Hashtable<String,String> parameters = new Hashtable<String,String>();
 
@@ -204,18 +197,52 @@ public class Sunrise implements ShortMessageService {
 	    rd.close();
 	    
 	    if (response.toString().indexOf("SMS wurde an "+phoneNumber+" gesendet.") <= 0) {
-	    	throw new Exception("Message was not sent.");
+	    	throw new Exception("Message has not been sent.");
 	    }
 	    
 	    _phoneNumber = phoneNumber;
 	    _shortMessage = shortMessage;
 	}
-		
-	public String getShortMessage() {
-	    return _shortMessage;
-	}
 	
-	public String getPhoneNumber() {
-	    return _phoneNumber;
+	@Override
+	public int getAvailableMessages() throws Exception {
+        if(!_isLoggedIn) {
+        	throw new Exception("You are not logged in!");        	
+        }
+        
+        URL url = new URL(HOST+"/mip/dyn/sms/sms?lang=de");
+		_conn = (HttpURLConnection) url.openConnection();
+	    _conn.setUseCaches (false);
+	    _conn.setDoInput(true);
+	    _conn.setDoOutput(true);
+	    
+	    _conn.setRequestMethod("GET");
+	    _conn.setRequestProperty("User-Agent", "libJSMS");	    
+	    _conn.setRequestProperty("Accept-Language","de-de");
+	    _conn.setRequestProperty("Cookie","JSESSIONID=" + _cookies.get("JSESSIONID") + ";SMIP=" + _cookies.get("SMIP") + "; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=de; mip_msg_dispContacts=0");
+	    
+	    InputStream is = _conn.getInputStream();
+	    BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+	    String line;
+
+	    _availableMessages = -1;    
+	    Pattern smsCounterPattern = Pattern.compile("Gratis ([0-9]{2,3})");
+	    while((line = rd.readLine()) != null) {
+	    	line = line.replaceAll("<[^>]+>","").trim();
+	    	if (!line.isEmpty()) {
+	    		Matcher smsCounterMatcher = smsCounterPattern.matcher(line);
+	    		if (smsCounterMatcher.matches()) {
+	    			String smsCounterString = smsCounterMatcher.group(1);
+	    			_availableMessages = Integer.valueOf(smsCounterString);	
+	    		}
+	    	}
+	    }
+	    rd.close();
+
+	    if (_availableMessages == -1) {
+	    	throw new Exception("Available Messages is unknown.");
+	    }
+        
+        return _availableMessages;
 	}
 }

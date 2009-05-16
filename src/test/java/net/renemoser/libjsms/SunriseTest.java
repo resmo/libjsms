@@ -99,4 +99,14 @@ public class SunriseTest
     	    
     	}
     }
+    
+    public void testGetAvailableMessages() {
+	    try {
+	    	ShortMessageService Service = new Sunrise();
+	    	Service.getAvailableMessages();   
+    	    fail("Should have thrown exception");
+    	} catch(Exception e) {
+    	    
+    	}
+    }
 }

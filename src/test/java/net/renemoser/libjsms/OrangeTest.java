@@ -99,4 +99,14 @@ public class OrangeTest
     	    
     	}
     }
+    
+    public void testGetAvailableMessages() {
+	    try {
+	    	ShortMessageService Service = new Orange();
+	    	Service.getAvailableMessages();   
+    	    fail("Should have thrown exception");
+    	} catch(Exception e) {
+    	    
+    	}
+    }
 }
