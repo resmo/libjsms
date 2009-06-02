@@ -22,7 +22,7 @@ Usage as external lib:
 import net.renemoser.libjsms.service.*;
 
 try {
-    ShortMessageService Service  = new Sunrise();
+    ShortMessageService Service  = new SunriseCH();
     Service.doLogin(userid, password);
     Service.sendShortMessage(phoneNumber, message);
     if (!Service.getShortMessage().isEmpty()) {
@@ -37,4 +37,4 @@ try {
 
 Usage as standalone:
 --------------------
-java -cp LibJSMS-x.y.jar net.renemoser.libjsms.App <userid> <password> <phoneNumber> <message> <provider:default=sunrise> 
+java -cp LibJSMS-x.y.jar net.renemoser.libjsms.App <userid> <password> <phoneNumber> <message> <provider:default=SunriseCH> 

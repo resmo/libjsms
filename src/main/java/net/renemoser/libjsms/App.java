@@ -17,19 +17,14 @@ public class App {
 		String phoneNumber = args[2];
 		String message = args[3];
 		
-		String provider = "";
+		String provider = "ServiceCH";
 		if (args.length >= 5) { 
 			provider = args[4].toLowerCase();
 		}		
 						
 	    try { 
-	    	ShortMessageService Service;
-	    	if (provider.equals("orange")) {
-	    		Service = new Orange();
-	    	} else {
-	    		provider = "Sunrise";
-	    		Service = new Sunrise();
-	    	}
+	    	ShortMessageService Service = ServiceFactory.getService(provider);
+	    	
 	    	// Login
 	    	System.out.println("Logging in...");
 	    	Service.doLogin(userid, password);
