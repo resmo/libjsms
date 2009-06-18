@@ -17,7 +17,7 @@ public class App {
 		String phoneNumber = args[2];
 		String message = args[3];
 		
-		String provider = "ServiceCH";
+		String provider = "SunriseCH";
 		if (args.length >= 5) { 
 			provider = args[4].toLowerCase();
 		}		
