@@ -25,6 +25,14 @@ public abstract class Provider {
 		java.security.Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
 	}
 	
+	public void doLogin(String userid, String password) throws Exception {
+		throw new Exception("doLogin() not implemented");
+	}
+	
+	public void sendShortMessage(String phoneNumber, String shortMessage) throws Exception {		
+		throw new Exception("sendShortMessage() not implemented");
+	}
+	
 	public String getPhoneNumber() throws Exception {
 		return _phoneNumber;
 	}

@@ -41,7 +41,7 @@ public class SunriseCH extends Provider implements ShortMessageService {
 		password = password.trim();
 		
 		// Empty user id or password
-	    if (userid.isEmpty() || password.isEmpty()) {
+	    if (userid == null || userid.equals("") || password == null || password.equals("")) {
     	    throw new Exception("UserID or password is empty!");     
 	    }
 	    
@@ -98,9 +98,9 @@ public class SunriseCH extends Provider implements ShortMessageService {
 	     	if (headerName.equals("Set-Cookie")) {                  
 	     		String cookie = _conn.getHeaderField(i);
 	     		cookie = cookie.substring(0, cookie.indexOf(";"));
-	            String cookieName = cookie.substring(0, cookie.indexOf("="));
-	            String cookieValue = cookie.substring(cookie.indexOf("=") + 1, cookie.length());
-	            if (!cookieValue.isEmpty()) {
+	            String cookieName = "" + cookie.substring(0, cookie.indexOf("="));
+	            String cookieValue = "" + cookie.substring(cookie.indexOf("=") + 1, cookie.length());
+	            if (!cookieValue.equals("")) {
 	            	_cookies.put(cookieName, cookieValue);
 	            }
 	     	}
@@ -130,7 +130,7 @@ public class SunriseCH extends Provider implements ShortMessageService {
             throw new Exception("Your message is too long!");
         }
 		
-        if (shortMessage.isEmpty()) {
+        if (shortMessage == null || shortMessage.equals("")) {
         	throw new Exception("Your message is empty!");
         }
         
@@ -228,8 +228,8 @@ public class SunriseCH extends Provider implements ShortMessageService {
 	    _availableMessages = -1;    
 	    Pattern smsCounterPattern = Pattern.compile("Gratis ([0-9]{2,3})");
 	    while((line = rd.readLine()) != null) {
-	    	line = line.replaceAll("<[^>]+>","").trim();
-	    	if (!line.isEmpty()) {
+	    	line = "" + line.replaceAll("<[^>]+>","").trim();
+	    	if (!line.equals("")) {
 	    		Matcher smsCounterMatcher = smsCounterPattern.matcher(line);
 	    		if (smsCounterMatcher.matches()) {
 	    			String smsCounterString = smsCounterMatcher.group(1);

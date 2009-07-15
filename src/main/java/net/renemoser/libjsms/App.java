@@ -38,7 +38,7 @@ public class App {
 	    	if (messagesLeft > 0) {
 	    		// Send SMS
 	    		Service.sendShortMessage(phoneNumber, message);
-	    		if (!Service.getShortMessage().isEmpty()) {
+	    		if (!Service.getShortMessage().equals("")) {
 	    			System.out.println("Message '" + 
 	    					Service.getShortMessage() + 
 	    					"' was sent to " + 
