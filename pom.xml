@@ -2,16 +2,31 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.renemoser.libjsms</groupId>
-  <artifactId>LibJSMS</artifactId>
+  <artifactId>libjsms</artifactId>
   <packaging>jar</packaging>
-  <version>0.4</version>
-  <name>LibJSMS</name>
-  <description>Java library to send short messages (alias SMS) using free web service of your mobile phone provider. Currently only Swiss mobile providers are supported, but feel free to add you provider's web interface.</description>
+  <version>0.5</version>
+  <name>SMS Maven Library - LibJSMS</name>
+  <description>Java library to send short messages (alias SMS) using free web service of your mobile phone operator. Currently only Swiss mobile operators are supported, but feel free to add your operator's web interface.</description>
   <url>http://www.renemoser.net/project</url>
+  <properties>
+        <scm.branch>master</scm.branch>
+    </properties>
+    <scm>
+        <url>http://github.com/resmo/libjsms/tree/${scm.branch}</url>
+        <connection>scm:git:git://github.com/resmo/libjsms.git</connection>
+        <developerConnection>scm:git:git://git@github.com/resmo/libjsms.git</developerConnection>
+    </scm>
+    <inceptionYear>2009</inceptionYear>
   <issueManagement>
   	<system>GitHub Issues</system>
   	<url>http://github.com/resmo/libjsms/issues</url>
   </issueManagement>
+  <licenses>
+    <license>
+        <name>GNU Lesser General Public License 3.0</name>
+        <url>LICENSE</url>
+    </license>
+  </licenses>
   <developers>
   	<developer>
   		<id>resmo</id>
