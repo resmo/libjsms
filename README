@@ -16,9 +16,11 @@ Currently the following operators are supported:
 
     * Sunrise CH
     * Orange CH
+    * Xtrazone CH
+    * Hispeed CH
 
 Any operator of the world which allows sending SMS over HTTP, web forms, etc., can 
-be added. Just send your code (patches) or mail me your creditals, so I am able to add support
+be added. Just send your code (patches) or mail me your login data, so I am able to add support
 for those operators.
 
 
