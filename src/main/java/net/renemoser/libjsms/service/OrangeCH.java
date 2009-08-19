@@ -11,8 +11,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import net.renemoser.libjsms.exception.AvailableMessagesUnknownException;
 import net.renemoser.libjsms.exception.LoginFailedException;
@@ -70,16 +68,7 @@ public class OrangeCH extends Provider implements ShortMessageService {
 	    parameters.put("redirect","");
 	    parameters.put("loginButton","Login");
 	    
-	    StringBuffer request = new StringBuffer();
-	    Enumeration<String> keys = parameters.keys();
-
-	    while (keys.hasMoreElements()) {
-            String key = keys.nextElement();
-            request.append(key);
-            request.append("=");
-            request.append(URLEncoder.encode(parameters.get(key),"UTF8"));
-            request.append("&");
-        }
+	    StringBuffer request = buildRequest(parameters);
 	    
 	    _conn.setRequestProperty("Content-Length", Integer.toString(request.toString().getBytes().length));	      
 
@@ -250,29 +239,11 @@ public class OrangeCH extends Provider implements ShortMessageService {
 	    	 cookieString.append(key + "=" + _cookies.get(key)+";");
 	    }
 	    _conn.setRequestProperty("Cookie", cookieString.toString());
-	    
-	    InputStream is = _conn.getInputStream();
-	    BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-	    String line;
 
-	    _availableMessages = -1;    
-	    Pattern smsCounterPattern = Pattern.compile("This month, you can still send ([0-9]{1,3}) free SMS.");
-	    while((line = rd.readLine()) != null) {
-	    	line = "" + line.replaceAll("<[^>]+>","").trim();
-	    	if (!line.equals("")) {
-	    		Matcher smsCounterMatcher = smsCounterPattern.matcher(line);
-	    		if (smsCounterMatcher.matches()) {
-	    			String smsCounterString = smsCounterMatcher.group(1);
-	    			_availableMessages = Integer.valueOf(smsCounterString);	
-	    		}
-	    	}
-	    }
-	    rd.close();
-
+	    _availableMessages = matchAvailableMessages("This month, you can still send ([0-9]{1,3}) free SMS.");    
 	    if (_availableMessages == -1) {
 	    	throw new AvailableMessagesUnknownException("Available messages is unknown.");
-	    }
-        
+	    } 
         return _availableMessages;
 	}
 }

@@ -5,12 +5,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.net.HttpURLConnection;
-import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import net.renemoser.libjsms.exception.AvailableMessagesUnknownException;
 import net.renemoser.libjsms.exception.LoginFailedException;
@@ -66,16 +62,7 @@ public class SunriseCH extends Provider implements ShortMessageService {
 	    parameters.put("password", password);
 	    parameters.put("_remember","on");
 
-	    StringBuffer request = new StringBuffer();
-	    Enumeration<String> keys = parameters.keys();
-
-	    while (keys.hasMoreElements()) {
-            String key = keys.nextElement();
-            request.append(key);
-            request.append("=");
-            request.append(URLEncoder.encode(parameters.get(key),"UTF8"));
-            request.append("&");
-        }
+	    StringBuffer request = buildRequest(parameters);
 	    
 	    _conn.setRequestProperty("Content-Length", Integer.toString(request.toString().getBytes().length));	      
 
@@ -171,16 +158,7 @@ public class SunriseCH extends Provider implements ShortMessageService {
 	    int charsLeft = MESSAGE_LENGHT - shortMessage.length();
 	    parameters.put("charsLeft", Integer.toString(charsLeft) + " / 1");
 
-	    StringBuffer request = new StringBuffer();
-	    Enumeration<String> keys = parameters.keys();
-
-	    while (keys.hasMoreElements()) {
-            String key = keys.nextElement();
-            request.append(key);
-            request.append("=");
-            request.append(URLEncoder.encode(parameters.get(key),"UTF8"));
-            request.append("&");
-        }
+	    StringBuffer request = buildRequest(parameters);
 	    
 	    _conn.setRequestProperty("Content-Length", Integer.toString(request.toString().getBytes().length));
 	    
@@ -225,28 +203,10 @@ public class SunriseCH extends Provider implements ShortMessageService {
 	    _conn.setRequestProperty("Accept-Language","de-de");
 	    _conn.setRequestProperty("Cookie","JSESSIONID=" + _cookies.get("JSESSIONID") + ";SMIP=" + _cookies.get("SMIP") + "; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=de; mip_msg_dispContacts=0");
 	    
-	    InputStream is = _conn.getInputStream();
-	    BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-	    String line;
-
-	    _availableMessages = -1;    
-	    Pattern smsCounterPattern = Pattern.compile("Gratis ([0-9]{2,3})");
-	    while((line = rd.readLine()) != null) {
-	    	line = "" + line.replaceAll("<[^>]+>","").trim();
-	    	if (!line.equals("")) {
-	    		Matcher smsCounterMatcher = smsCounterPattern.matcher(line);
-	    		if (smsCounterMatcher.matches()) {
-	    			String smsCounterString = smsCounterMatcher.group(1);
-	    			_availableMessages = Integer.valueOf(smsCounterString);	
-	    		}
-	    	}
-	    }
-	    rd.close();
-
+	    _availableMessages = matchAvailableMessages("Gratis ([0-9]{2,3})");
 	    if (_availableMessages == -1) {
 	    	throw new AvailableMessagesUnknownException("Available messages is unknown.");
 	    }
-        
         return _availableMessages;
 	}
 }
