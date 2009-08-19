@@ -12,6 +12,10 @@ import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.renemoser.libjsms.exception.AvailableMessagesUnknownException;
+import net.renemoser.libjsms.exception.LoginFailedException;
+import net.renemoser.libjsms.exception.NotSentException;
+
 /**
  * Sunrise CH SMS Service
  * 
@@ -31,7 +35,7 @@ public class SunriseCH extends Provider implements ShortMessageService {
 	}
 	
 	@Override
-	public void doLogin(String userid, String password) throws Exception {
+	public void doLogin(String userid, String password) throws LoginFailedException,Exception {
 		// Make empty
 		_shortMessage = "";
 		_phoneNumber = "";
@@ -42,7 +46,7 @@ public class SunriseCH extends Provider implements ShortMessageService {
 		
 		// Empty user id or password
 	    if (userid == null || userid.equals("") || password == null || password.equals("")) {
-    	    throw new Exception("UserID or password is empty!");     
+    	    throw new LoginFailedException("UserID or password is empty!");     
 	    }
 	    
 	    URL url = new URL(HOST+"/mip/dyn/login/login?SAMLRequest=fVLJTsMwEL0j8Q%2BW79kqQGA1qUoRohJL1AYO3FxnkrpNxsHjtPD3pGnLcoCjn5%2FfMp7h6L2u2AYsaYMxj%2FyQM0Blco1lzJ%2BzW%2B%2BSj5LTkyHJumrEuHVLnMFbC%2BRY9xJJ9Bcxby0KI0mTQFkDCafEfPxwLwZ%2BKBprnFGm4mx6E3OZy2YtscG11qpeQYFqoXGdr81KQYmrCosiL%2FOas5djrMEu1pSohSmSk%2Bg6KAyvvDDywsssOhPhhTg%2Ff%2BUsPThda9w3%2BC%2FWYk8icZdlqZc%2BzbNeYKNzsI8dO%2BalMWUFvjL1zj6VRHrTwc62wNmYCKzr8k0MUluDnYPdaAXPs%2FuYL51rSATBdrv1v1UCGVCLVlN3WgZSEU%2F6wYq%2Bm%2F0x0f%2BTy6M1T77Fh8EPqeTwYbse05vUVFp9sHFVme3EgnRfJW6NraX72y3yox7RuVf0VNEiNaB0oSHnLEj2rr83o9uXTw%3D%3D&RelayState=https%3A%2F%2Fwww.google.com%2Fa%2Fsunrise.ch%2FServiceLogin%3Fcontinue%3Dhttp%253A%252F%252Fpartnerpage.google.com%252Fsunrise.ch%252Fdefault%252Fpostlogin%253Fpid%253Dsunrise.ch%2526url%253Dhttp%253A%252F%252Fpartnerpage.google.com%252Fsunrise.ch%26followup%3Dhttp%253A%252F%252Fpartnerpage.google.com%252Fsunrise.ch%252Fdefault%252Fpostlogin%253Fpid%253Dsunrise.ch%2526url%253Dhttp%253A%252F%252Fpartnerpage.google.com%252Fsunrise.ch%26service%3Dig%26passive%3Dtrue%26cd%3DUS%26hl%3Dde%26nui%3D1%26ltmpl%3Ddefault%26go%3Dtrue%26passive_sso%3Dtrue");
@@ -112,13 +116,13 @@ public class SunriseCH extends Provider implements ShortMessageService {
 	    
 	    // Login unsuccessful if no cookies are set
 		if(!_cookies.containsKey("SMIP") || !_cookies.containsKey("JSESSIONID")) {
-			throw new Exception("Login unsuccessful. Warning: Sunrise only allow 5 attempts in 10 minutes.");
+			throw new LoginFailedException("Login unsuccessful. Warning: Sunrise only allow 5 attempts in 10 minutes.");
 		}
 		_isLoggedIn = true;
 	}
 	
 	@Override
-	public void sendShortMessage(String phoneNumber, String shortMessage) throws Exception {		
+	public void sendShortMessage(String phoneNumber, String shortMessage) throws NotSentException, Exception {		
 		// Make empty
 		_shortMessage = "";
 		_phoneNumber = "";
@@ -127,17 +131,17 @@ public class SunriseCH extends Provider implements ShortMessageService {
 		phoneNumber = phoneNumber.trim();
         
 		if (shortMessage.length() > MESSAGE_LENGHT) {
-            throw new Exception("Your message is too long!");
+            throw new NotSentException("Your message is too long!");
         }
 		
         if (shortMessage == null || shortMessage.equals("")) {
-        	throw new Exception("Your message is empty!");
+        	throw new NotSentException("Your message is empty!");
         }
         
         // 0791234567 or +41791234567
         if ((phoneNumber.length() != 10 && phoneNumber.length() != 12 ) || 
         		!phoneNumber.matches("^[0-9+]+$")) {
-        	throw new Exception("Phone number '" + phoneNumber + "' looks wrong!");
+        	throw new NotSentException("Phone number '" + phoneNumber + "' looks wrong!");
         }
         
         if(!_isLoggedIn) {
@@ -197,7 +201,7 @@ public class SunriseCH extends Provider implements ShortMessageService {
 	    rd.close();
 	    
 	    if (response.toString().indexOf("SMS wurde an "+phoneNumber+" gesendet.") <= 0) {
-	    	throw new Exception("Message has not been sent.");
+	    	throw new NotSentException("Message has not been sent.");
 	    }
 	    
 	    _phoneNumber = phoneNumber;
@@ -205,9 +209,9 @@ public class SunriseCH extends Provider implements ShortMessageService {
 	}
 	
 	@Override
-	public int getAvailableMessages() throws Exception {
+	public int getAvailableMessages() throws AvailableMessagesUnknownException, Exception {
         if(!_isLoggedIn) {
-        	throw new Exception("You are not logged in!");        	
+        	throw new AvailableMessagesUnknownException("You are not logged in!");        	
         }
         
         URL url = new URL(HOST+"/mip/dyn/sms/sms?lang=de");
@@ -240,7 +244,7 @@ public class SunriseCH extends Provider implements ShortMessageService {
 	    rd.close();
 
 	    if (_availableMessages == -1) {
-	    	throw new Exception("Available messages is unknown.");
+	    	throw new AvailableMessagesUnknownException("Available messages is unknown.");
 	    }
         
         return _availableMessages;

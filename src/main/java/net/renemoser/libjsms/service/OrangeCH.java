@@ -14,6 +14,10 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.renemoser.libjsms.exception.AvailableMessagesUnknownException;
+import net.renemoser.libjsms.exception.LoginFailedException;
+import net.renemoser.libjsms.exception.NotSentException;
+
 /**
  * Orange CH SMS Service
  * 
@@ -32,7 +36,7 @@ public class OrangeCH extends Provider implements ShortMessageService {
 		super();
 	}
 	
-	public void doLogin(String userid, String password) throws Exception {
+	public void doLogin(String userid, String password) throws LoginFailedException, Exception {
 		// Make empty
 		_shortMessage = "";
 		_phoneNumber = "";
@@ -43,7 +47,7 @@ public class OrangeCH extends Provider implements ShortMessageService {
 		
 		// Empty user id or password
 	    if (userid == null || userid.equals("") || password == null || password.equals("")) {
-    	    throw new Exception("UserID or password is empty!");     
+    	    throw new LoginFailedException("UserID or password is empty!");     
 	    }
 	    
 	    URL url = new URL(HOST+"/footer/login/loginForm?ts=1242151218216");
@@ -97,7 +101,7 @@ public class OrangeCH extends Provider implements ShortMessageService {
 	    rd.close();
 	    
 	    if (response.toString().indexOf("Your username and/or password are not valid. Please try again.") > 0) {
-	    	throw new Exception("Your username and/or password are not valid. Please try again.");
+	    	throw new LoginFailedException("Your username and/or password are not valid. Please try again.");
 	    }
 	    
 	    // Set cookies 
@@ -123,13 +127,13 @@ public class OrangeCH extends Provider implements ShortMessageService {
 				!_cookies.containsKey("JSESSIONID") || 
 				!_cookies.containsKey("user.session")
 						) {
-			throw new Exception("Login unsuccessful.");
+			throw new LoginFailedException("Login unsuccessful.");
 		}
 		
 		_isLoggedIn = true;
 	}
 
-	public void sendShortMessage(String phoneNumber, String shortMessage) throws Exception {		
+	public void sendShortMessage(String phoneNumber, String shortMessage) throws NotSentException, Exception {		
 		// Make empty
 		_shortMessage = "";
 		_phoneNumber = "";
@@ -138,17 +142,17 @@ public class OrangeCH extends Provider implements ShortMessageService {
 		phoneNumber = phoneNumber.trim();
         
 		if (shortMessage.length() > MESSAGE_LENGHT) {
-            throw new Exception("Your message is too long!");
+            throw new NotSentException("Your message is too long!");
         }
 		
         if (shortMessage == null || shortMessage.equals("")) {
-        	throw new Exception("Your message is empty!");
+        	throw new NotSentException("Your message is empty!");
         }
         
         // 0791234567 or +41791234567
         if ((phoneNumber.length() != 10 && phoneNumber.length() != 12 ) || 
         		!phoneNumber.matches("^[0-9+]+$")) {
-        	throw new Exception("Phone number '" + phoneNumber + "' looks wrong!");
+        	throw new NotSentException("Phone number '" + phoneNumber + "' looks wrong!");
         }
         
         if(!_isLoggedIn) {
@@ -215,7 +219,7 @@ public class OrangeCH extends Provider implements ShortMessageService {
 	    rd.close();
 	    
 	    if (response.toString().indexOf("Your SMS has been sent.") <= 0) {
-	    	throw new Exception("Message has not been sent.");
+	    	throw new NotSentException("Message has not been sent.");
 	    }
 	    
 	    _phoneNumber = phoneNumber;
@@ -223,9 +227,9 @@ public class OrangeCH extends Provider implements ShortMessageService {
 	}
 	
 	@Override
-	public int getAvailableMessages() throws Exception {
+	public int getAvailableMessages() throws AvailableMessagesUnknownException, Exception {
         if(!_isLoggedIn) {
-        	throw new Exception("You are not logged in!");        	
+        	throw new AvailableMessagesUnknownException("You are not logged in!");        	
         }
         
         URL url = new URL(HOST+"/myorange/sms/smsForm?ts=1242151653520");
@@ -266,7 +270,7 @@ public class OrangeCH extends Provider implements ShortMessageService {
 	    rd.close();
 
 	    if (_availableMessages == -1) {
-	    	throw new Exception("Available messages is unknown.");
+	    	throw new AvailableMessagesUnknownException("Available messages is unknown.");
 	    }
         
         return _availableMessages;

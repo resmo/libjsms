@@ -4,6 +4,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import net.renemoser.libjsms.exception.AvailableMessagesUnknownException;
+import net.renemoser.libjsms.exception.LoginFailedException;
+import net.renemoser.libjsms.exception.NotSentException;
 import net.renemoser.libjsms.service.*;
 
 /**
@@ -35,9 +38,11 @@ public class SunriseCHTest
 	    try {
 	    	ShortMessageService Service = new SunriseCH();
     	    Service.doLogin("","");
-    	    fail("Should have thrown exception");
+    	    fail("Should have thrown LoginFailedException");
+    	} catch (LoginFailedException le) {
+    		
     	} catch(Exception e) {
-    	    
+    	    fail("Should have thrown LoginFailedException");
     	}
     }
     
@@ -46,9 +51,11 @@ public class SunriseCHTest
 	    try {
 	    	ShortMessageService Service = new SunriseCH();
     	    Service.doLogin("unknownUser","wrongPassword");
-    	    fail("Should have thrown exception");
+    	    fail("Should have thrown LoginFailedException");
+    	} catch (LoginFailedException le) {
+    		
     	} catch(Exception e) {
-    	    
+    	    fail("Should have thrown LoginFailedException");
     	}
     }
     
@@ -57,9 +64,11 @@ public class SunriseCHTest
 	    try {
 	    	ShortMessageService Service = new SunriseCH();
     	    Service.sendShortMessage("0761234567", "");
-    	    fail("Should have thrown exception");
+    	    fail("Should have thrown NotSentException");
+    	} catch (NotSentException le) {
+    		
     	} catch(Exception e) {
-    	    
+    	    fail("Should have thrown NotSentException");
     	}
     }
     
@@ -72,9 +81,11 @@ public class SunriseCHTest
 	    		message += "too long ";
 	    	}    	
     	    Service.sendShortMessage("0761234567", message);
-    	    fail("Should have thrown exception");
+    	    fail("Should have thrown NotSentException");
+    	} catch (NotSentException le) {
+    		
     	} catch(Exception e) {
-    	    
+    	    fail("Should have thrown NotSentException");
     	}
     }
     
@@ -83,9 +94,11 @@ public class SunriseCHTest
 	    try {
 	    	ShortMessageService Service = new SunriseCH();
     	    Service.sendShortMessage("076 123 45 67", "test message");
-    	    fail("Should have thrown exception");
+    	    fail("Should have thrown NotSentException");
+    	} catch (NotSentException le) {
+    		
     	} catch(Exception e) {
-    	    
+    	    fail("Should have thrown NotSentException");
     	}
     }
     
@@ -94,9 +107,11 @@ public class SunriseCHTest
 	    try {
 	    	ShortMessageService Service = new SunriseCH();
     	    Service.sendShortMessage("+41 076 123 45 67", "test message");
-    	    fail("Should have thrown exception");
+    	    fail("Should have thrown NotSentException");
+    	} catch (NotSentException le) {
+    		
     	} catch(Exception e) {
-    	    
+    	    fail("Should have thrown NotSentException");
     	}
     }
     
@@ -104,9 +119,11 @@ public class SunriseCHTest
 	    try {
 	    	ShortMessageService Service = new SunriseCH();
 	    	Service.getAvailableMessages();   
-    	    fail("Should have thrown exception");
+    	    fail("Should have thrown AvailableMessagesUnknownException");
+    	} catch (AvailableMessagesUnknownException le) {
+    		
     	} catch(Exception e) {
-    	    
+    	    fail("Should have thrown AvailableMessagesUnknownException");
     	}
     }
 }
