@@ -22,7 +22,7 @@ import net.renemoser.libjsms.exception.NotSentException;
  * @author René Moser <mail@renemoser.net>
  * @version 0.2
  */
-public class OrangeCH extends Provider implements ShortMessageService {
+public class OrangeCH extends Operator implements ShortMessageService {
 
     private static final String HOST = "https://www.orange.ch";
     private static final int MESSAGE_LENGHT = 144;

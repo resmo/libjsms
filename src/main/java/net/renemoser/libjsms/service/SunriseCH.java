@@ -18,7 +18,7 @@ import net.renemoser.libjsms.exception.NotSentException;
  * @author René Moser <mail@renemoser.net>
  * @version 0.2
  */
-public class SunriseCH extends Provider implements ShortMessageService {
+public class SunriseCH extends Operator implements ShortMessageService {
 
     private final static String HOST = "https://mip.sunrise.ch";
     private final static int MESSAGE_LENGHT = 160;
