@@ -1,5 +1,6 @@
 package net.renemoser.libjsms;
 
+import net.renemoser.libjsms.exception.AvailableMessagesUnknownException;
 import net.renemoser.libjsms.service.ShortMessageService;
 
 /**
@@ -20,7 +21,7 @@ public class App {
 
 	String provider = "SunriseCH";
 	if (args.length >= 5) {
-	    provider = args[4].toLowerCase();
+	    provider = args[4];
 	}
 
 	try {
@@ -32,12 +33,18 @@ public class App {
 
 	    // Available messages
 	    System.out.println("Getting free messages left...");
-	    int messagesLeft = Service.getAvailableMessages();
-	    String messagesLeftString = Integer.toString(messagesLeft);
-	    System.out.println("You have " + messagesLeftString
-		    + " messages left");
+	    int messagesLeft = -1;
+	    try {
+		messagesLeft = Service.getAvailableMessages();
+		String messagesLeftString = Integer.toString(messagesLeft);
+		System.out.println("You have " + messagesLeftString
+			+ " messages left");
 
-	    if (messagesLeft > 0) {
+	    } catch (AvailableMessagesUnknownException AME) {
+		System.out.println(AME.getMessage());
+	    }
+
+	    if (messagesLeft > 0 || messagesLeft < 0) {
 		// Send SMS
 		Service.sendShortMessage(phoneNumber, message);
 		if (!Service.getShortMessage().equals("")) {
