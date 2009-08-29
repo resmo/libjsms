@@ -1,19 +1,14 @@
-/**
- * 
- */
 package net.renemoser.libjsms.exception;
 
-/**
- * @author moserre
- *
- */
 public class LoginFailedException extends Exception {
 
-	public LoginFailedException() {
-		super();
-	}
+    private static final long serialVersionUID = 1L;
 
-	public LoginFailedException(String message) {
-		super(message);
-	}
+    public LoginFailedException() {
+	super();
+    }
+
+    public LoginFailedException(String message) {
+	super(message);
+    }
 }

@@ -2,12 +2,13 @@ package net.renemoser.libjsms.exception;
 
 public class AvailableMessagesUnknownException extends Exception {
 
-	public AvailableMessagesUnknownException() {
-		// TODO Auto-generated constructor stub
-	}
+    private static final long serialVersionUID = 1L;
 
-	public AvailableMessagesUnknownException(String message) {
-		super(message);
-		// TODO Auto-generated constructor stub
-	}
+    public AvailableMessagesUnknownException() {
+	super();
+    }
+
+    public AvailableMessagesUnknownException(String message) {
+	super(message);
+    }
 }

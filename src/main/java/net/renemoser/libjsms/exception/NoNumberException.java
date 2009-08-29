@@ -2,12 +2,13 @@ package net.renemoser.libjsms.exception;
 
 public class NoNumberException extends Exception {
 
-	public NoNumberException() {
-		// TODO Auto-generated constructor stub
-	}
+    private static final long serialVersionUID = 1L;
 
-	public NoNumberException(String message) {
-		super(message);
-		// TODO Auto-generated constructor stub
-	}
+    public NoNumberException() {
+	super();
+    }
+
+    public NoNumberException(String message) {
+	super(message);
+    }
 }
