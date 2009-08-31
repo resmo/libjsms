@@ -1,4 +1,4 @@
-package net.renemoser.libjsms;
+package net.renemoser.libjsms.service;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -6,8 +6,6 @@ import junit.framework.TestSuite;
 import net.renemoser.libjsms.exception.AvailableMessagesUnknownException;
 import net.renemoser.libjsms.exception.LoginFailedException;
 import net.renemoser.libjsms.exception.NotSentException;
-import net.renemoser.libjsms.service.ShortMessageService;
-import net.renemoser.libjsms.service.SunriseCH;
 
 /**
  * Unit test for Sunrise.
@@ -32,55 +30,57 @@ public class SunriseCHTest extends TestCase {
 
     public void testGetAvailableMessages() {
 	try {
-	    ShortMessageService Service = new SunriseCH();
+	    SunriseCH Service = new SunriseCH();
 	    Service.getAvailableMessages();
 	    fail("Should have thrown AvailableMessagesUnknownException");
 	} catch (AvailableMessagesUnknownException le) {
 
 	} catch (Exception e) {
-	    fail("Should have thrown AvailableMessagesUnknownException");
+	    fail("Should have thrown AvailableMessagesUnknownException: "
+		    + e.getMessage());
 	}
     }
 
     public void testLoginEmpty() {
 	try {
-	    ShortMessageService Service = new SunriseCH();
+	    SunriseCH Service = new SunriseCH();
 	    Service.doLogin("", "");
 	    fail("Should have thrown LoginFailedException");
 	} catch (LoginFailedException le) {
 
 	} catch (Exception e) {
-	    fail("Should have thrown LoginFailedException");
+	    fail("Should have thrown LoginFailedException: " + e.getMessage());
 	}
     }
 
     public void testLoginWrong() {
 	try {
-	    ShortMessageService Service = new SunriseCH();
+	    SunriseCH Service = new SunriseCH();
 	    Service.doLogin("unknownUser", "wrongPassword");
 	    fail("Should have thrown LoginFailedException");
 	} catch (LoginFailedException le) {
 
 	} catch (Exception e) {
-	    fail("Should have thrown LoginFailedException");
+	    fail("Should have thrown LoginFailedException: " + e.getMessage());
 	}
     }
 
     public void testSendMessageEmptyMessage() {
 	try {
-	    ShortMessageService Service = new SunriseCH();
+	    SunriseCH Service = new SunriseCH();
 	    Service.sendShortMessage("0761234567", "");
 	    fail("Should have thrown NotSentException");
 	} catch (NotSentException le) {
 
 	} catch (Exception e) {
-	    fail("Should have thrown NotSentException");
+	    fail("Should have thrown NotSentException: " + e.getMessage());
 	}
     }
 
     public void testSendMessageMessageTooLong() {
 	try {
-	    ShortMessageService Service = new SunriseCH();
+	    SunriseCH Service = new SunriseCH();
+	    Service.setLoggedIn(true);
 	    String message = "";
 	    for (int i = 0; i < 20; i++) {
 		message += "too long ";
@@ -90,31 +90,31 @@ public class SunriseCHTest extends TestCase {
 	} catch (NotSentException le) {
 
 	} catch (Exception e) {
-	    fail("Should have thrown NotSentException");
+	    fail("Should have thrown NotSentException: " + e.getMessage());
 	}
     }
 
     public void testSendMessagePhoneNumberWrong1() {
 	try {
-	    ShortMessageService Service = new SunriseCH();
+	    SunriseCH Service = new SunriseCH();
 	    Service.sendShortMessage("076 123 45 67", "test message");
 	    fail("Should have thrown NotSentException");
 	} catch (NotSentException le) {
 
 	} catch (Exception e) {
-	    fail("Should have thrown NotSentException");
+	    fail("Should have thrown NotSentException: " + e.getMessage());
 	}
     }
 
     public void testSendMessagePhoneNumberWrong2() {
 	try {
-	    ShortMessageService Service = new SunriseCH();
+	    SunriseCH Service = new SunriseCH();
 	    Service.sendShortMessage("+41 076 123 45 67", "test message");
 	    fail("Should have thrown NotSentException");
 	} catch (NotSentException le) {
 
 	} catch (Exception e) {
-	    fail("Should have thrown NotSentException");
+	    fail("Should have thrown NotSentException: " + e.getMessage());
 	}
     }
 }
