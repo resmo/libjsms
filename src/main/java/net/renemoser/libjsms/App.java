@@ -10,7 +10,7 @@ public class App {
     public static void main(String[] args) {
 	if (args.length < 4) {
 	    System.err
-		    .println("Use: java -cp LibJSMS-x.y.jar net.renemoser.libjsms.App <userid> <password> <phoneNumber> <message> <provider:default=sunrise>");
+		    .println("Use: java -cp libjsms-x.y.jar net.renemoser.libjsms.App <userid> <password> <phoneNumber> <message> <provider:default=SunriseCH>");
 	    System.exit(0);
 	}
 
@@ -19,13 +19,13 @@ public class App {
 	String phoneNumber = args[2];
 	String message = args[3];
 
-	String provider = "SunriseCH";
+	String operator = "SunriseCH";
 	if (args.length >= 5) {
-	    provider = args[4];
+	    operator = args[4];
 	}
 
 	try {
-	    ShortMessageService Service = ServiceFactory.getService(provider);
+	    ShortMessageService Service = ServiceFactory.getService(operator);
 
 	    // Login
 	    System.out.println("Logging in...");
@@ -40,8 +40,8 @@ public class App {
 		System.out.println("You have " + messagesLeftString
 			+ " messages left");
 
-	    } catch (AvailableMessagesUnknownException AME) {
-		System.out.println(AME.getMessage());
+	    } catch (AvailableMessagesUnknownException ame) {
+		System.out.println(ame.getMessage());
 	    }
 
 	    if (messagesLeft > 0 || messagesLeft < 0) {
