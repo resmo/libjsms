@@ -9,11 +9,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import net.renemoser.libjsms.exception.LoginFailedException;
+import net.renemoser.libjsms.exception.NotSentException;
 
 /**
  * @author René Moser <mail@renemoser.net>
@@ -21,14 +25,18 @@ import java.util.regex.Pattern;
  * 
  */
 public abstract class Operator {
-    protected Hashtable<String, String> _cookies = new Hashtable<String, String>();
-    protected HttpURLConnection _conn;
+    private final Hashtable<String, String> cookies = new Hashtable<String, String>();
+    private HttpURLConnection conn;
+    private String shortMessage = "";
+    private String phoneNumber = "";
+    private final int availableMessages = -1;
+    private boolean isLoggedIn = false;
 
-    protected String _shortMessage = "";
-    protected String _phoneNumber = "";
-    protected int _availableMessages = -1;
-    protected boolean _isLoggedIn = false;
-
+    /**
+     * Constructor
+     * 
+     * @throws Exception
+     */
     public Operator() throws Exception {
 	System.getProperties().put("java.protocol.handler.pkgs",
 		"com.sun.net.ssl.internal.www.protocol");
@@ -37,8 +45,136 @@ public abstract class Operator {
     }
 
     /**
+     * Returns available messages left
+     * 
+     * @return availableMessages
+     * @throws Exception
+     */
+    public int getAvailableMessages() throws Exception {
+	if (availableMessages < 0) {
+	    throw new Exception("Available messages are unknown.");
+	}
+	return availableMessages;
+    }
+
+    /**
+     * Returns phone number
+     * 
+     * @return phoneNumber
+     */
+    public String getPhoneNumber() {
+	return phoneNumber;
+    }
+
+    /**
+     * Returns short message
+     * 
+     * @return shortMessage
+     */
+    public String getShortMessage() {
+	return shortMessage;
+    }
+
+    /**
+     * Sets short message
+     * 
+     * @param shortMessage
+     */
+    protected void setShortMessage(String shortMessage) {
+	this.shortMessage = shortMessage;
+    }
+
+    /**
+     * @param userid
+     * @param password
+     * @throws LoginFailedException
+     * @throws Exception
+     */
+    protected void doLogin(String userid, String password)
+	    throws LoginFailedException, Exception {
+	// Trim inputs
+	userid = userid.trim();
+	password = password.trim();
+
+	// Empty user id or password
+	if (userid == null || userid.equals("") || password == null
+		|| password.equals("")) {
+	    throw new LoginFailedException("UserID or password is empty!");
+	}
+    }
+
+    /**
+     * Validates phone number and short message
+     * 
+     * @param phoneNumber
+     * @param shortMessage
+     * @throws Exception
+     */
+    protected void sendShortMessage(String phoneNumber, String shortMessage)
+	    throws Exception {
+	shortMessage = shortMessage.trim();
+	phoneNumber = phoneNumber.trim();
+
+	if (shortMessage == null || shortMessage.equals("")) {
+	    throw new NotSentException("Your message is empty!");
+	}
+
+	// 0791234567 or +41791234567
+	if ((phoneNumber.length() != 10 && phoneNumber.length() != 12)
+		|| !phoneNumber.matches("^[0-9+]+$")) {
+	    throw new NotSentException("Phone number '" + phoneNumber
+		    + "' looks wrong!");
+	}
+
+	if (!isLoggedIn()) {
+	    throw new Exception("You are not logged in!");
+	}
+    }
+
+    /**
+     * Initialize the HTTP URL connection
+     * 
+     * @param url
+     * @return connection
+     * @throws IOException
+     */
+    protected HttpURLConnection buildConnection(URL url) throws IOException {
+	conn = (HttpURLConnection) url.openConnection();
+	conn.setUseCaches(false);
+	conn.setDoInput(true);
+	conn.setDoOutput(true);
+
+	conn.setRequestMethod("POST");
+	conn.setRequestProperty("User-Agent", "libjsms");
+	conn.setRequestProperty("Accept-Language", "en");
+	conn.setRequestProperty("Content-Type",
+		"application/x-www-form-urlencoded");
+	return conn;
+    }
+
+    /**
+     * Return HashMap of added cookies
+     * 
+     * @return cookies
+     */
+    protected Hashtable<String, String> getCookies() {
+	return cookies;
+    }
+
+    /**
+     * Sets the phone number
+     * 
+     * @param phoneNumber
+     */
+    protected void setPhoneNumber(String phoneNumber) {
+	this.phoneNumber = phoneNumber;
+    }
+
+    /**
+     * Builds a request string of given parameters (Hashtable)
+     * 
      * @param parameters
-     * @return
+     * @return request
      * @throws UnsupportedEncodingException
      */
     protected StringBuffer buildRequest(Hashtable<String, String> parameters)
@@ -56,38 +192,40 @@ public abstract class Operator {
 	return request;
     }
 
-    public void doLogin(String userid, String password) throws Exception {
-	throw new Exception("doLogin() not implemented");
-    }
-
-    public int getAvailableMessages() throws Exception {
-	if (_availableMessages < 0) {
-	    throw new Exception("Available messages are unknown.");
-	}
-	return _availableMessages;
-    }
-
-    public String getPhoneNumber() throws Exception {
-	return _phoneNumber;
-    }
-
-    public String getShortMessage() throws Exception {
-	return _shortMessage;
+    /**
+     * Returns true if logged in
+     * 
+     * @return isLoggedIn
+     */
+    protected boolean isLoggedIn() {
+	return isLoggedIn;
     }
 
     /**
+     * Sets login state
+     * 
+     * @param loggedIn
+     */
+    protected void setLoggedIn(boolean loggedIn) {
+	isLoggedIn = loggedIn;
+    }
+
+    /**
+     * Returns the integer value of input stream by given pattern
+     * 
      * @throws IOException
      * @throws NumberFormatException
      */
     protected int matchAvailableMessages(String pattern) throws IOException,
 	    NumberFormatException {
-	InputStream is = _conn.getInputStream();
+	InputStream is = conn.getInputStream();
 	BufferedReader rd = new BufferedReader(new InputStreamReader(is));
 	String line;
 
 	int availableMessages = -1;
 	Pattern smsCounterPattern = Pattern.compile(pattern);
 	while ((line = rd.readLine()) != null) {
+	    // Strip html tags
 	    line = "" + line.replaceAll("<[^>]+>", "").trim();
 	    if (!line.equals("")) {
 		Matcher smsCounterMatcher = smsCounterPattern.matcher(line);
@@ -101,8 +239,46 @@ public abstract class Operator {
 	return availableMessages;
     }
 
-    public void sendShortMessage(String phoneNumber, String shortMessage)
-	    throws Exception {
-	throw new Exception("sendShortMessage() not implemented");
+    /**
+     * Grabs cookies of HTTP response and add them to Hashtable
+     * 
+     * @param conn
+     */
+    protected void setCookies(HttpURLConnection conn) {
+	// Set cookies
+	String headerName = null;
+	for (int i = 1; (headerName = conn.getHeaderFieldKey(i)) != null; i++) {
+	    if (headerName.equals("Set-Cookie")) {
+		String cookie = conn.getHeaderField(i);
+		cookie = cookie.substring(0, cookie.indexOf(";"));
+		String cookieName = ""
+			+ cookie.substring(0, cookie.indexOf("="));
+		String cookieValue = ""
+			+ cookie.substring(cookie.indexOf("=") + 1, cookie
+				.length());
+		if (!cookieValue.equals("")) {
+		    cookies.put(cookieName, cookieValue);
+		}
+	    }
+	}
+    }
+
+    /**
+     * Get HTTP response
+     * 
+     * @param is
+     * @return response
+     * @throws IOException
+     */
+    protected StringBuffer getResponse(InputStream is) throws IOException {
+	BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+	String line;
+	StringBuffer response = new StringBuffer();
+	while ((line = rd.readLine()) != null) {
+	    response.append(line.replaceAll("<[^>]+>", "").trim());
+	    response.append('\r');
+	}
+	rd.close();
+	return response;
     }
 }

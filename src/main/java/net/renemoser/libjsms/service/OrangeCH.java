@@ -1,13 +1,9 @@
 package net.renemoser.libjsms.service;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
@@ -37,34 +33,13 @@ public class OrangeCH extends Operator implements ShortMessageService {
     @Override
     public void doLogin(String userid, String password)
 	    throws LoginFailedException, Exception {
-	// Make empty
-	_shortMessage = "";
-	_phoneNumber = "";
 
-	// Trim inputs
-	userid = userid.trim();
-	password = password.trim();
-
-	// Empty user id or password
-	if (userid == null || userid.equals("") || password == null
-		|| password.equals("")) {
-	    throw new LoginFailedException("UserID or password is empty!");
-	}
+	super.doLogin(userid, password);
 
 	URL url = new URL(HOST + "/footer/login/loginForm?ts=1242151218216");
-	_conn = (HttpURLConnection) url.openConnection();
-	_conn.setUseCaches(false);
-	_conn.setDoInput(true);
-	_conn.setDoOutput(true);
-
-	_conn.setRequestMethod("POST");
-	_conn.setRequestProperty("User-Agent", "libJSMS");
-	_conn.setRequestProperty("Accept-Language", "en");
-	_conn.setRequestProperty("Content-Type",
-		"application/x-www-form-urlencoded");
+	HttpURLConnection conn = buildConnection(url);
 
 	Hashtable<String, String> parameters = new Hashtable<String, String>();
-
 	parameters.put("username", userid);
 	parameters.put("password", password);
 	parameters.put("wui_target_id", "loginButton");
@@ -74,26 +49,16 @@ public class OrangeCH extends Operator implements ShortMessageService {
 
 	StringBuffer request = buildRequest(parameters);
 
-	_conn.setRequestProperty("Content-Length", Integer.toString(request
+	conn.setRequestProperty("Content-Length", Integer.toString(request
 		.toString().getBytes().length));
 
-	OutputStream outStream = _conn.getOutputStream();
+	OutputStream outStream = conn.getOutputStream();
 	outStream.write(request.toString().getBytes());
 	outStream.flush();
 	outStream.close();
 
 	// Get Response
-	InputStream is = _conn.getInputStream();
-
-	BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-	String line;
-	StringBuffer response = new StringBuffer();
-	while ((line = rd.readLine()) != null) {
-	    response.append(line.replaceAll("<[^>]+>", "").trim());
-	    response.append('\r');
-	}
-	rd.close();
-
+	StringBuffer response = getResponse(conn.getInputStream());
 	if (response
 		.toString()
 		.indexOf(
@@ -102,122 +67,75 @@ public class OrangeCH extends Operator implements ShortMessageService {
 		    "Your username and/or password are not valid. Please try again.");
 	}
 
-	// Set cookies
-	String headerName = null;
-	for (int i = 1; (headerName = _conn.getHeaderFieldKey(i)) != null; i++) {
-	    if (headerName.equals("Set-Cookie")) {
-		String cookie = _conn.getHeaderField(i);
-		cookie = cookie.substring(0, cookie.indexOf(";"));
-		String cookieName = ""
-			+ cookie.substring(0, cookie.indexOf("="));
-		String cookieValue = ""
-			+ cookie.substring(cookie.indexOf("=") + 1, cookie
-				.length());
-		if (!cookieValue.equals("")) {
-		    _cookies.put(cookieName, cookieValue);
-		}
-	    }
-	}
+	setCookies(conn);
 
-	if (_conn != null) {
-	    _conn.disconnect();
+	if (conn != null) {
+	    conn.disconnect();
 	}
 
 	// Login unsuccessful if no cookies are set
-	if (!_cookies.containsKey("ades.lb")
-		|| !_cookies.containsKey("JSESSIONID")
-		|| !_cookies.containsKey("user.session")) {
+	if (!getCookies().containsKey("ades.lb")
+		|| !getCookies().containsKey("JSESSIONID")
+		|| !getCookies().containsKey("user.session")) {
 	    throw new LoginFailedException("Login unsuccessful.");
 	}
 
-	_isLoggedIn = true;
+	setLoggedIn(true);
     }
 
     @Override
     public int getAvailableMessages() throws AvailableMessagesUnknownException,
 	    Exception {
-	if (!_isLoggedIn) {
+
+	if (!isLoggedIn()) {
 	    throw new AvailableMessagesUnknownException(
 		    "You are not logged in!");
 	}
 
 	URL url = new URL(HOST + "/myorange/sms/smsForm?ts=1242151653520");
-	_conn = (HttpURLConnection) url.openConnection();
-	_conn.setUseCaches(false);
-	_conn.setDoInput(true);
-	_conn.setDoOutput(true);
-
-	_conn.setRequestMethod("GET");
-	_conn.setRequestProperty("User-Agent", "libJSMS");
-	_conn.setRequestProperty("Accept-Language", "en");
+	HttpURLConnection conn = buildConnection(url);
+	conn.setRequestMethod("GET");
 
 	StringBuffer cookieString = new StringBuffer();
-	Set<String> cookieSet = _cookies.keySet();
+	Set<String> cookieSet = getCookies().keySet();
 	Iterator<String> itr = cookieSet.iterator();
 	while (itr.hasNext()) {
 	    String key = itr.next();
-	    cookieString.append(key + "=" + _cookies.get(key) + ";");
+	    cookieString.append(key + "=" + getCookies().get(key) + ";");
 	}
-	_conn.setRequestProperty("Cookie", cookieString.toString());
 
-	_availableMessages = matchAvailableMessages("This month, you can still send ([0-9]{1,3}) free SMS.");
-	if (_availableMessages == -1) {
+	conn.setRequestProperty("Cookie", cookieString.toString());
+
+	int availableMessages = matchAvailableMessages("This month, you can still send ([0-9]{1,3}) free SMS.");
+	if (availableMessages == -1) {
 	    throw new AvailableMessagesUnknownException(
 		    "Available messages is unknown.");
 	}
-	return _availableMessages;
+	return availableMessages;
     }
 
     @Override
     public void sendShortMessage(String phoneNumber, String shortMessage)
 	    throws NotSentException, Exception {
-	// Make empty
-	_shortMessage = "";
-	_phoneNumber = "";
 
-	shortMessage = shortMessage.trim();
-	phoneNumber = phoneNumber.trim();
+	super.sendShortMessage(phoneNumber, shortMessage);
 
 	if (shortMessage.length() > MESSAGE_LENGHT) {
 	    throw new NotSentException("Your message is too long!");
 	}
 
-	if (shortMessage == null || shortMessage.equals("")) {
-	    throw new NotSentException("Your message is empty!");
-	}
-
-	// 0791234567 or +41791234567
-	if ((phoneNumber.length() != 10 && phoneNumber.length() != 12)
-		|| !phoneNumber.matches("^[0-9+]+$")) {
-	    throw new NotSentException("Phone number '" + phoneNumber
-		    + "' looks wrong!");
-	}
-
-	if (!_isLoggedIn) {
-	    throw new Exception("You are not logged in!");
-	}
-
 	URL url = new URL(HOST + "/myorange/sms/smsForm?ts=1242151653520");
-	_conn = (HttpURLConnection) url.openConnection();
-	_conn.setUseCaches(false);
-	_conn.setDoInput(true);
-	_conn.setDoOutput(true);
-
-	_conn.setRequestMethod("POST");
-	_conn.setRequestProperty("User-Agent", "libJSMS");
-	_conn.setRequestProperty("Accept-Language", "en");
-	_conn.setRequestProperty("Content-Type",
-		"application/x-www-form-urlencoded");
+	HttpURLConnection conn = buildConnection(url);
 
 	StringBuffer cookieString = new StringBuffer();
-	Set<String> cookieSet = _cookies.keySet();
+	Set<String> cookieSet = getCookies().keySet();
 	Iterator<String> itr = cookieSet.iterator();
 	while (itr.hasNext()) {
 	    String key = itr.next();
-	    cookieString.append(key + "=" + _cookies.get(key) + ";");
+	    cookieString.append(key + "=" + getCookies().get(key) + ";");
 	}
 
-	_conn.setRequestProperty("Cookie", cookieString.toString());
+	conn.setRequestProperty("Cookie", cookieString.toString());
 
 	Hashtable<String, String> parameters = new Hashtable<String, String>();
 	parameters.put("wui_target_id", "sendButton");
@@ -228,41 +146,24 @@ public class OrangeCH extends Operator implements ShortMessageService {
 	int charsLeft = MESSAGE_LENGHT - shortMessage.length();
 	parameters.put("charNumberLeftOutput", Integer.toString(charsLeft));
 
-	StringBuffer request = new StringBuffer();
-	Enumeration<String> keys = parameters.keys();
+	StringBuffer request = buildRequest(parameters);
 
-	while (keys.hasMoreElements()) {
-	    String key = keys.nextElement();
-	    request.append(key);
-	    request.append("=");
-	    request.append(URLEncoder.encode(parameters.get(key), "UTF8"));
-	    request.append("&");
-	}
-
-	_conn.setRequestProperty("Content-Length", Integer.toString(request
+	conn.setRequestProperty("Content-Length", Integer.toString(request
 		.toString().getBytes().length));
 
-	OutputStream outStream = _conn.getOutputStream();
+	OutputStream outStream = conn.getOutputStream();
 	outStream.write(request.toString().getBytes());
 	outStream.flush();
 	outStream.close();
 
 	// Get Response
-	InputStream is = _conn.getInputStream();
-	BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-	String line;
-	StringBuffer response = new StringBuffer();
-	while ((line = rd.readLine()) != null) {
-	    response.append(line.replaceAll("<[^>]+>", "").trim());
-	    response.append('\r');
-	}
-	rd.close();
+	InputStream is = conn.getInputStream();
+	StringBuffer response = getResponse(is);
 
 	if (response.toString().indexOf("Your SMS has been sent.") <= 0) {
 	    throw new NotSentException("Message has not been sent.");
 	}
-
-	_phoneNumber = phoneNumber;
-	_shortMessage = shortMessage;
+	setPhoneNumber(phoneNumber);
+	setShortMessage(shortMessage);
     }
 }
