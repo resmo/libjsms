@@ -18,8 +18,8 @@ Currently the following operators are supported:
     * Orange CH
 
 Any operator of the world which allows sending SMS over HTTP, web forms, etc., can 
-be added. Just send your code (patches) or mail me your creditals, so I am able to add support
-for those operators.
+be added. Just send your code (patches) or mail me your credentials, so I am able 
+to add support for those operators.
 
 
 Background:
