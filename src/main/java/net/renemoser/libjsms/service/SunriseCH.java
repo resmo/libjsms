@@ -14,7 +14,7 @@ import net.renemoser.libjsms.exception.NotSentException;
  * Sunrise CH SMS Service
  * 
  * @author René Moser <mail@renemoser.net>
- * @version 0.2
+ * @version 0.3
  */
 public class SunriseCH extends Operator implements ShortMessageService {
 
@@ -61,7 +61,14 @@ public class SunriseCH extends Operator implements ShortMessageService {
 	outStream.close();
 
 	// Get Response
-	getResponse(conn.getInputStream());
+	InputStream is = conn.getInputStream();
+	StringBuffer response = getResponse(is);
+
+	if (response.toString().indexOf("Anmeldung fehlgeschlagen.") > 0) {
+	    throw new LoginFailedException(
+		    "Login unsuccessful. Warning: Sunrise only allow 5 attempts in 10 minutes.");
+	}
+
 	setCookies(conn);
 
 	// Disconnect
@@ -70,8 +77,7 @@ public class SunriseCH extends Operator implements ShortMessageService {
 	}
 
 	// Login unsuccessful if no cookies are set
-	if (!getCookies().containsKey("SMIP")
-		|| !getCookies().containsKey("JSESSIONID")) {
+	if (!getCookies().containsKey("JSESSIONID")) {
 	    throw new LoginFailedException(
 		    "Login unsuccessful. Warning: Sunrise only allow 5 attempts in 10 minutes.");
 	}
@@ -95,8 +101,6 @@ public class SunriseCH extends Operator implements ShortMessageService {
 			"Cookie",
 			"JSESSIONID="
 				+ getCookies().get("JSESSIONID")
-				+ ";SMIP="
-				+ getCookies().get("SMIP")
 				+ "; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=de; mip_msg_dispContacts=0");
 
 	int availableMessages = matchAvailableMessages("Gratis ([0-9]{2,3})");
@@ -127,8 +131,6 @@ public class SunriseCH extends Operator implements ShortMessageService {
 			"Cookie",
 			"JSESSIONID="
 				+ getCookies().get("JSESSIONID")
-				+ ";SMIP="
-				+ getCookies().get("SMIP")
 				+ "; org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE=de; mip_msg_dispContacts=0");
 
 	// Set parameters
