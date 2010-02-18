@@ -4,8 +4,8 @@
   <groupId>net.renemoser.libjsms</groupId>
   <artifactId>libjsms</artifactId>
   <packaging>jar</packaging>
-  <version>0.7</version>
-  <name>SMS Maven Library - LibJSMS</name>
+  <version>0.8</version>
+  <name>SMS Maven Library - libjsms</name>
   <description>Java library to send short messages (alias SMS) using free web service of your mobile phone operator. Currently only Swiss mobile operators are supported, but feel free to add your operator's web interface.</description>
   <url>http://www.renemoser.net/project</url>
   <properties>
