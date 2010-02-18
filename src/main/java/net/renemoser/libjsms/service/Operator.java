@@ -27,10 +27,9 @@ import net.renemoser.libjsms.exception.NotSentException;
 public abstract class Operator {
     private final Hashtable<String, String> cookies = new Hashtable<String, String>();
     private HttpURLConnection conn;
-    private String shortMessage = "";
-    private String phoneNumber = "";
-    private final int availableMessages = -1;
-    private boolean isLoggedIn = false;
+    private String shortMessage;
+    private String phoneNumber;
+    private boolean isLoggedIn;
 
     /**
      * Constructor
@@ -51,10 +50,7 @@ public abstract class Operator {
      * @throws Exception
      */
     public int getAvailableMessages() throws Exception {
-	if (availableMessages < 0) {
-	    throw new Exception("Available messages are unknown.");
-	}
-	return availableMessages;
+	throw new Exception("Available messages are unknown.");
     }
 
     /**
