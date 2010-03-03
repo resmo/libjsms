@@ -16,6 +16,7 @@ import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.renemoser.libjsms.exception.AvailableMessagesUnknownException;
 import net.renemoser.libjsms.exception.LoginFailedException;
 import net.renemoser.libjsms.exception.NotSentException;
 
@@ -24,18 +25,13 @@ import net.renemoser.libjsms.exception.NotSentException;
  * @since 0.3
  * 
  */
-public abstract class Operator {
+public abstract class Operator implements ShortMessageService {
+
     private final Hashtable<String, String> cookies = new Hashtable<String, String>();
     private HttpURLConnection conn;
-    private String shortMessage;
-    private String phoneNumber;
+    private String shortMessage, phoneNumber, password, userId;
     private boolean isLoggedIn;
 
-    /**
-     * Constructor
-     * 
-     * @throws Exception
-     */
     public Operator() throws Exception {
 	System.getProperties().put("java.protocol.handler.pkgs",
 		"com.sun.net.ssl.internal.www.protocol");
@@ -43,77 +39,38 @@ public abstract class Operator {
 		.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
     }
 
-    /**
-     * Returns available messages left
-     * 
-     * @return availableMessages
-     * @throws Exception
-     */
-    public int getAvailableMessages() throws Exception {
-	throw new Exception("Available messages are unknown.");
-    }
-
-    /**
-     * Returns phone number
-     * 
-     * @return phoneNumber
-     */
-    public String getPhoneNumber() {
-	return phoneNumber;
-    }
-
-    /**
-     * Returns short message
-     * 
-     * @return shortMessage
-     */
-    public String getShortMessage() {
-	return shortMessage;
-    }
-
-    /**
-     * Sets short message
-     * 
-     * @param shortMessage
-     */
-    protected void setShortMessage(String shortMessage) {
-	this.shortMessage = shortMessage;
-    }
-
-    /**
-     * @param userid
-     * @param password
-     * @throws LoginFailedException
-     * @throws Exception
-     */
-    protected void doLogin(String userid, String password)
-	    throws LoginFailedException, Exception {
-	// Trim inputs
-	userid = userid.trim();
+    public void setPassword(String password) throws LoginFailedException {
 	password = password.trim();
-
-	// Empty user id or password
-	if (userid == null || userid.equals("") || password == null
-		|| password.equals("")) {
-	    throw new LoginFailedException("UserID or password is empty!");
+	if (password == null || password.equals("")) {
+	    throw new LoginFailedException("Password is empty!");
 	}
+	this.password = password;
     }
 
-    /**
-     * Validates phone number and short message
-     * 
-     * @param phoneNumber
-     * @param shortMessage
-     * @throws Exception
-     */
-    protected void sendShortMessage(String phoneNumber, String shortMessage)
-	    throws Exception {
-	shortMessage = shortMessage.trim();
-	phoneNumber = phoneNumber.trim();
-
-	if (shortMessage == null || shortMessage.equals("")) {
-	    throw new NotSentException("Your message is empty!");
+    public String getPassword() throws LoginFailedException {
+	if (password == null) {
+	    throw new LoginFailedException("Password not set");
 	}
+	return password;
+    }
+
+    public void setUserId(String userId) throws LoginFailedException {
+	userId = userId.trim();
+	if (userId.length() == 0) {
+	    throw new LoginFailedException("User id is empty");
+	}
+	this.userId = userId;
+    }
+
+    public String getUserId() throws LoginFailedException {
+	if (userId == null) {
+	    throw new LoginFailedException("User ID not set");
+	}
+	return userId;
+    }
+
+    public void setPhoneNumber(String phoneNumber) throws NotSentException {
+	phoneNumber = phoneNumber.trim();
 
 	// 0791234567 or +41791234567
 	if ((phoneNumber.length() != 10 && phoneNumber.length() != 12)
@@ -121,10 +78,59 @@ public abstract class Operator {
 	    throw new NotSentException("Phone number '" + phoneNumber
 		    + "' looks wrong!");
 	}
+	this.phoneNumber = phoneNumber;
+    }
+
+    public String getPhoneNumber() throws NotSentException {
+	if (phoneNumber == null) {
+	    throw new NotSentException("Phone number not set");
+	}
+	return phoneNumber;
+    }
+
+    public String getShortMessage() throws NotSentException {
+	if (shortMessage == null) {
+	    throw new NotSentException("Short message not set");
+	}
+	return shortMessage;
+    }
+
+    public void setShortMessage(String shortMessage) throws NotSentException {
+	shortMessage = shortMessage.trim();
+	if (shortMessage == null || shortMessage.equals("")) {
+	    throw new NotSentException("Your message is empty!");
+	}
+	this.shortMessage = shortMessage;
+    }
+
+    public void doLogin() throws LoginFailedException, Exception {
+	doLogin(getUserId(), getPassword());
+    }
+
+    public void doLogin(String userId, String password)
+	    throws LoginFailedException, Exception {
+	setUserId(userId);
+	setPassword(password);
+    }
+
+    public void sendShortMessage() throws NotSentException, Exception {
+	this.sendShortMessage(getPhoneNumber(), getShortMessage());
+    }
+
+    public void sendShortMessage(String phoneNumber, String shortMessage)
+	    throws NotSentException, Exception {
+
+	setPhoneNumber(phoneNumber);
+	setShortMessage(shortMessage);
 
 	if (!isLoggedIn()) {
-	    throw new Exception("You are not logged in!");
+	    throw new NotSentException("You are not logged in!");
 	}
+    }
+
+    public int getAvailableMessages() throws Exception {
+	throw new AvailableMessagesUnknownException(
+		"Available messages are unknown.");
     }
 
     /**
@@ -155,15 +161,6 @@ public abstract class Operator {
      */
     protected Hashtable<String, String> getCookies() {
 	return cookies;
-    }
-
-    /**
-     * Sets the phone number
-     * 
-     * @param phoneNumber
-     */
-    protected void setPhoneNumber(String phoneNumber) {
-	this.phoneNumber = phoneNumber;
     }
 
     /**

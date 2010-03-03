@@ -14,7 +14,7 @@ import net.renemoser.libjsms.exception.NotSentException;
  * Sunrise CH SMS Service
  * 
  * @author René Moser <mail@renemoser.net>
- * @version 0.3
+ * @version 0.4
  */
 public class SunriseCH extends Operator implements ShortMessageService {
 
@@ -29,11 +29,10 @@ public class SunriseCH extends Operator implements ShortMessageService {
     }
 
     @Override
-    public void doLogin(String userid, String password)
+    public void doLogin(String userId, String password)
 	    throws LoginFailedException, Exception {
 
-	// Do some validation
-	super.doLogin(userid, password);
+	super.doLogin(userId, password);
 
 	// Initialize connection
 	URL url = new URL(
@@ -44,8 +43,8 @@ public class SunriseCH extends Operator implements ShortMessageService {
 
 	// Set parameters
 	Hashtable<String, String> parameters = new Hashtable<String, String>();
-	parameters.put("username", userid);
-	parameters.put("password", password);
+	parameters.put("username", getUserId());
+	parameters.put("password", getPassword());
 	parameters.put("_remember", "on");
 
 	// Build request
@@ -87,6 +86,7 @@ public class SunriseCH extends Operator implements ShortMessageService {
     @Override
     public int getAvailableMessages() throws AvailableMessagesUnknownException,
 	    Exception {
+
 	if (!isLoggedIn()) {
 	    throw new AvailableMessagesUnknownException(
 		    "You are not logged in!");
@@ -112,15 +112,23 @@ public class SunriseCH extends Operator implements ShortMessageService {
     }
 
     @Override
-    public void sendShortMessage(String phoneNumber, String shortMessage)
-	    throws NotSentException, Exception {
-
-	// Do some validations
-	super.sendShortMessage(phoneNumber, shortMessage);
-
-	if (shortMessage.length() > MESSAGE_LENGHT) {
+    public void setShortMessage(String shortMessage) throws NotSentException {
+	super.setShortMessage(shortMessage);
+	if (getShortMessage().length() > MESSAGE_LENGHT) {
 	    throw new NotSentException("Your message is too long!");
 	}
+    }
+
+    @Override
+    public void sendShortMessage(String phoneNumber, String shortMessage)
+	    throws NotSentException, Exception {
+	super.sendShortMessage(phoneNumber, shortMessage);
+	sendShortMessage();
+    }
+
+    @Override
+    public void sendShortMessage() throws NotSentException, Exception {
+	super.sendShortMessage();
 
 	// Initialize connection
 	URL url = new URL(HOST + "/mip/dyn/sms/sms?lang=de");
@@ -135,13 +143,13 @@ public class SunriseCH extends Operator implements ShortMessageService {
 
 	// Set parameters
 	Hashtable<String, String> parameters = new Hashtable<String, String>();
-	parameters.put("recipient", phoneNumber);
-	parameters.put("message", shortMessage);
+	parameters.put("recipient", getPhoneNumber());
+	parameters.put("message", getShortMessage());
 	parameters.put("type", "sms");
 	parameters.put("task", "send");
 	parameters.put("send", "send");
 
-	int charsLeft = MESSAGE_LENGHT - shortMessage.length();
+	int charsLeft = MESSAGE_LENGHT - getShortMessage().length();
 	parameters.put("charsLeft", Integer.toString(charsLeft) + " / 1");
 
 	// Build request
@@ -161,11 +169,8 @@ public class SunriseCH extends Operator implements ShortMessageService {
 	StringBuffer response = getResponse(is);
 
 	if (response.toString().indexOf(
-		"SMS wurde an " + phoneNumber + " gesendet.") <= 0) {
+		"SMS wurde an " + getPhoneNumber() + " gesendet.") <= 0) {
 	    throw new NotSentException("Message has not been sent.");
 	}
-
-	setPhoneNumber(phoneNumber);
-	setShortMessage(shortMessage);
     }
 }

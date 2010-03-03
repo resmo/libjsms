@@ -16,7 +16,7 @@ import net.renemoser.libjsms.exception.NotSentException;
  * Orange CH SMS Service
  * 
  * @author René Moser <mail@renemoser.net>
- * @version 0.2
+ * @version 0.3
  */
 public class OrangeCH extends Operator implements ShortMessageService {
 
@@ -31,17 +31,17 @@ public class OrangeCH extends Operator implements ShortMessageService {
     }
 
     @Override
-    public void doLogin(String userid, String password)
+    public void doLogin(String userId, String password)
 	    throws LoginFailedException, Exception {
 
-	super.doLogin(userid, password);
+	super.doLogin(userId, password);
 
 	URL url = new URL(HOST + "/footer/login/loginForm?ts=1242151218216");
 	HttpURLConnection conn = buildConnection(url);
 
 	Hashtable<String, String> parameters = new Hashtable<String, String>();
-	parameters.put("username", userid);
-	parameters.put("password", password);
+	parameters.put("username", getUserId());
+	parameters.put("password", getPassword());
 	parameters.put("wui_target_id", "loginButton");
 	parameters.put("wui_event_id", "onclick");
 	parameters.put("redirect", "");
@@ -115,14 +115,18 @@ public class OrangeCH extends Operator implements ShortMessageService {
     }
 
     @Override
+    public void setShortMessage(String shortMessage) throws NotSentException {
+	super.setShortMessage(shortMessage);
+	if (getShortMessage().length() > MESSAGE_LENGHT) {
+	    throw new NotSentException("Your message is too long!");
+	}
+    }
+
+    @Override
     public void sendShortMessage(String phoneNumber, String shortMessage)
 	    throws NotSentException, Exception {
 
 	super.sendShortMessage(phoneNumber, shortMessage);
-
-	if (shortMessage.length() > MESSAGE_LENGHT) {
-	    throw new NotSentException("Your message is too long!");
-	}
 
 	URL url = new URL(HOST + "/myorange/sms/smsForm?ts=1242151653520");
 	HttpURLConnection conn = buildConnection(url);
@@ -163,7 +167,6 @@ public class OrangeCH extends Operator implements ShortMessageService {
 	if (response.toString().indexOf("Your SMS has been sent.") <= 0) {
 	    throw new NotSentException("Message has not been sent.");
 	}
-	setPhoneNumber(phoneNumber);
-	setShortMessage(shortMessage);
+
     }
 }
