@@ -48,6 +48,20 @@ Usage as external lib factory method:
         e.printStackTrace();
     }
 
+or
+    
+    String provider = "SunriseCH";
+    try {
+        ShortMessageService Service = ServiceFactory.getService(provider);
+        Service.setUserId(userid);
+        Service.setPassword(password);
+        Service.setPhoneNumber(phoneNumber);
+        Service.setShortMessage(message);
+        Service.doLogin();
+        Service.sendShortMessage();
+    } catch(Exception e) {
+        e.printStackTrace();
+    }
 
 Usage as external lib:
 ----------------------
@@ -57,12 +71,10 @@ Usage as external lib:
         ShortMessageService Service  = new SunriseCH();
         Service.doLogin(userid, password);
         Service.sendShortMessage(phoneNumber, message);
-        if (!Service.getShortMessage().isEmpty()) {
-        	System.out.println("Message '" + 
-        	Service.getShortMessage() + 
-        	"' was sent to " + 
-        	Service.getPhoneNumber());
-        }
+        System.out.println("Message '" + 
+        Service.getShortMessage() +
+        "' was sent to " + 
+        Service.getPhoneNumber());
     } catch(Exception e) {
         e.printStackTrace();
     }
