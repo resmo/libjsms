@@ -2,6 +2,7 @@ Java library sending "short messages" over HTTP
 ===============================================
 
 [![Build Status](https://secure.travis-ci.org/resmo/libjsms.png?branch=master)](http://travis-ci.org/resmo/libjsms)
+[![Build Status](https://buildhive.cloudbees.com/job/resmo/job/libjsms/badge/icon)](https://buildhive.cloudbees.com/job/resmo/job/libjsms/)
 
 
 (c) René Moser, <mail@renemoser.net>, 2009 
